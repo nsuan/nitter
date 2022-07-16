@@ -109,7 +109,7 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
 
       if rss.len > 0:
         meta(property="twitter:card", content="summary")
-      else if video.len == 0:
+      elif video.len == 0:
         meta(property="twitter:card", content="summary_large_image")
 
     if video.len > 0:
