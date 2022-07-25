@@ -89,7 +89,7 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
     meta(name="theme-color", content="#1F1F1F")
     meta(property="og:type", content=ogType)
     meta(property="og:title", content=(if ogTitle.len > 0: ogTitle else: titleText))
-    meta(property="og:description", content=stripHtml(desc))
+    meta(property="og:description", content=stripHtml(desc).replace("\n",""))
     meta(property="og:site_name", content="Nitter")
     meta(property="og:locale", content="en_US")
 
@@ -107,7 +107,7 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
       meta(property="og:image", content=image)
       meta(property="twitter:image:src", content=image)
 
-      if rss.len > 0:
+      if rss.len > 0 and video.len == 0:
         meta(property="twitter:card", content="summary")
       elif video.len == 0:
         meta(property="twitter:card", content="summary_large_image")
