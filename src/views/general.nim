@@ -25,7 +25,7 @@ proc renderNavbar(cfg: Config; req: Request; rss, canonical: string): VNode =
       tdiv(class="nav-item"):
         a(class="site-name", href="/"): text cfg.title
 
-      a(href="/"): img(class="site-logo", src="/logo.png", alt="Logo")
+      a(href="/"): img(class="site-logo", src="/logo.png", alt="Logo", width="35", height="35")
 
       tdiv(class="nav-item right"):
         icon "search", title="Search", href="/search"
@@ -113,16 +113,17 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
         meta(property="twitter:card", content="summary_large_image")
 
     if video.len > 0:
-      meta(property="og:video:url", content=video)
-      meta(property="og:video", content=video)
-      meta(property="og:video:secure_url", content=video)
+      let vidUrl = getUrlPrefix(cfg) & getVidUrl(video)
+      meta(property="og:video:url", content=vidUrl)
+      meta(property="og:video", content=vidUrl)
+      meta(property="og:video:secure_url", content=vidUrl)
       meta(property="og:video:type", content="video/mp4")
       meta(property="og:video:width", content="720")
       meta(property="og:video:height", content="480")
       meta(property="twitter:card", content="player")
       meta(property="twitter:player:width", content="720")
       meta(property="twitter:player:height", content="480")
-      meta(property="twitter:player:stream", content=video)
+      meta(property="twitter:player:stream", content=vidUrl)
       meta(property="twitter:player:stream:content_type", content="video/mp4")
 
 
