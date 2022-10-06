@@ -38,7 +38,7 @@ proc renderNavbar(cfg: Config; req: Request; rss, canonical: string): VNode =
 
 proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
                  video=""; images: seq[string] = @[]; banner=""; ogTitle="";
-                 rss=""; canonical=""): VNode =
+                 rss=""; canonical="", ogVideo=""): VNode =
   var theme = prefs.theme.toTheme
   if "theme" in req.params:
     theme = req.params["theme"].toTheme
@@ -113,7 +113,7 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
         meta(property="twitter:card", content="summary_large_image")
 
     if video.len > 0:
-      let vidUrl = getUrlPrefix(cfg) & getVidUrl(video)
+      let vidUrl = getUrlPrefix(cfg) & getVidUrl(ogVideo)
       meta(property="og:video:url", content=vidUrl)
       meta(property="og:video", content=vidUrl)
       meta(property="og:video:secure_url", content=vidUrl)
@@ -133,14 +133,14 @@ proc renderHead*(prefs: Prefs; cfg: Config; req: Request; titleText=""; desc="";
          href="/fonts/fontello.woff2?21002321", crossorigin="anonymous")
 
 proc renderMain*(body: VNode; req: Request; cfg: Config; prefs=defaultPrefs;
-                 titleText=""; desc=""; ogTitle=""; rss=""; video="";
+                 titleText=""; desc=""; ogTitle=""; rss=""; video=""; ogVideo="";
                  images: seq[string] = @[]; banner=""): string =
 
   let canonical = getTwitterLink(req.path, req.params)
 
   let node = buildHtml(html(lang="en")):
     renderHead(prefs, cfg, req, titleText, desc, video, images, banner, ogTitle,
-               rss, canonical)
+               rss, canonical, ogVideo)
 
     body:
       renderNavbar(cfg, req, rss, canonical)

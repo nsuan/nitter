@@ -44,10 +44,15 @@ proc createStatusRouter*(cfg: Config) =
       var
         images = conv.tweet.photos
         video = ""
+        ogVideo = "h"
 
       if conv.tweet.video.isSome():
         images = @[get(conv.tweet.video).thumb]
         video = getVideoEmbed(cfg, conv.tweet.id)
+        let 
+            vid = conv.tweet.video.get()
+            vars = vid.variants.filterIt(it.contentType == mp4)
+        ogVideo = vars[0].url            
       elif conv.tweet.gif.isSome():
         images = @[get(conv.tweet.gif).thumb]
         video = getPicUrl(get(conv.tweet.gif).url)
@@ -60,7 +65,7 @@ proc createStatusRouter*(cfg: Config) =
 
       let html = renderConversation(conv, prefs, getPath() & "#m")
       resp renderMain(html, request, cfg, prefs, title, desc, ogTitle,
-                      images=images, video=video)
+                      images=images, video=video, ogVideo=ogVideo)
 
     get "/@name/@s/@id/@m/?@i?":
       cond @"s" in ["status", "statuses"]
