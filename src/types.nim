@@ -9,6 +9,7 @@ type
   InternalError* = object of CatchableError
 
   Api* {.pure.} = enum
+    tweetDetail
     userShow
     timeline
     search
@@ -176,6 +177,7 @@ type
     available*: bool
     tombstone*: string
     location*: string
+    # Unused, needed for backwards compat
     source*: string
     stats*: TweetStats
     retweet*: Option[Tweet]
