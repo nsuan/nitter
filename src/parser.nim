@@ -204,11 +204,11 @@ proc parseTweet(js: JsonNode; jsCard: JsonNode = newJNull()): Tweet =
     )
   )
 
+  result.expandTweetEntities(js)
+
   # fix for pinned threads
   if result.hasThread and result.threadId == 0:
     result.threadId = js{"self_thread", "id_str"}.getId
-
-  result.expandTweetEntities(js)
 
   if js{"is_quote_status"}.getBool:
     result.quote = some Tweet(id: js{"quoted_status_id_str"}.getId)
@@ -301,7 +301,8 @@ proc parseGlobalObjects(js: JsonNode): GlobalObjects =
 
 proc parseStatus*(js: JsonNode): Tweet =
   with e, js{"errors"}:
-    if e.getError == tweetNotFound:
+    if e.getError in {tweetNotFound, tweetUnavailable, tweetCensored, doesntExist,
+                      tweetNotAuthorized, suspended}:
       return
 
   result = parseTweet(js, js{"card"})
@@ -384,6 +385,9 @@ proc parseGraphTweet(js: JsonNode): Tweet =
 
   result = parseTweet(js{"legacy"}, jsCard)
   result.user = parseUser(js{"core", "user_results", "result", "legacy"})
+
+  with noteTweet, js{"note_tweet", "note_tweet_results", "result"}:
+    result.expandNoteTweetEntities(noteTweet)
 
   if result.quote.isSome:
     result.quote = some(parseGraphTweet(js{"quoted_status_result", "result"}))
