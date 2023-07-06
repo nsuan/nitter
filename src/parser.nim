@@ -33,7 +33,7 @@ proc parseGraphUser(js: JsonNode): User =
   result = parseUser(user{"legacy"})
 
   if "is_blue_verified" in user:
-    result.verified = true
+    result.verified = user{"is_blue_verified"}.getBool()
 
 proc parseGraphList*(js: JsonNode): List =
   if js.isNull: return
@@ -381,16 +381,15 @@ proc parsePhotoRail*(js: JsonNode): PhotoRail =
 
 proc parseGraphTweet(js: JsonNode): Tweet =
   if js.kind == JNull:
-    return Tweet(available: false)
+    return Tweet()
 
   case js{"__typename"}.getStr
   of "TweetUnavailable":
-    return Tweet(available: false)
+    return Tweet()
   of "TweetTombstone":
-    return Tweet(
-      available: false,
-      text: js{"tombstone", "text"}.getTombstone
-    )
+    return Tweet(text: js{"tombstone", "text"}.getTombstone)
+  of "TweetPreviewDisplay":
+    return Tweet(text: "You're unable to view this Tweet because it's only available to the Subscribers of the account owner.")
   of "TweetWithVisibilityResults":
     return parseGraphTweet(js{"tweet"})
 
@@ -490,6 +489,10 @@ proc parseGraphTimeline*(js: JsonNode; root: string; after=""): Timeline =
             let tweet = parseGraphTweet(tweetResult)
             if not tweet.available:
               tweet.id = parseBiggestInt(entryId.getId())
+            result.content.add tweet
+        elif entryId.startsWith("profile-conversation") or entryId.startsWith("homeConversation"):
+          let (thread, self) = parseGraphThread(e)
+          for tweet in thread.content:
             result.content.add tweet
         elif entryId.startsWith("cursor-bottom"):
           result.bottom = e{"content", "value"}.getStr
